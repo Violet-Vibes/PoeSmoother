@@ -13,10 +13,6 @@ public class Camera : IPatch
 
     public double ZoomLevel { get; set; } = 2.4;
 
-    private readonly string[] _directory = {
-        "metadata",
-    };
-
     private readonly string[] _extensions = {
         ".ot",
         ".otc",
@@ -26,10 +22,9 @@ public class Camera : IPatch
         "CreateCameraZoomNode",
         "ClearCameraZoomNodes",
         "CreateCameraLookAtNode",
-        "SetCustomCameraSpeed",
         "CreateCameraPanNode",
+        "SetCustomCameraSpeed",
         "RemoveCustomCameraSpeed",
-
     };
 
     private void RecursivePatcher(DirectoryNode dir)
@@ -53,7 +48,7 @@ public class Camera : IPatch
                     var record = file.Record;
                     var bytes = record.Read();
                     string data = System.Text.Encoding.Unicode.GetString(bytes.ToArray());
-                    
+
                     if (!_functions.Any(func => data.Contains(func)))
                     {
                         continue;
@@ -64,7 +59,7 @@ public class Camera : IPatch
                     for (int i = lines.Count - 1; i >= 0; i--)
                     {
                         string? foundFunction = _functions.FirstOrDefault(func => lines[i].Contains(func));
-                        
+
                         while (foundFunction != null)
                         {
                             int start = lines[i].IndexOf(foundFunction);
@@ -86,9 +81,10 @@ public class Camera : IPatch
 
     public void Apply(DirectoryNode root)
     {
+        // go to metadata/
         foreach (var d in root.Children)
         {
-            if (d is DirectoryNode dir && _directory.Contains(dir.Name))
+            if (d is DirectoryNode dir && dir.Name == "metadata")
             {
                 RecursivePatcher(dir);
 
