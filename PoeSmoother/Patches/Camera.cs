@@ -17,9 +17,19 @@ public class Camera : IPatch
         "metadata",
     };
 
-    private readonly string[] extensions = {
+    private readonly string[] _extensions = {
         ".ot",
         ".otc",
+    };
+
+    private readonly string[] _functions = {
+        "CreateCameraZoomNode",
+        "ClearCameraZoomNodes",
+        "CreateCameraLookAtNode",
+        "SetCustomCameraSpeed",
+        "CreateCameraPanNode",
+        "RemoveCustomCameraSpeed",
+
     };
 
     private void RecursivePatcher(DirectoryNode dir)
@@ -33,7 +43,7 @@ public class Camera : IPatch
             else if (d is FileNode file)
             {
 
-                if (Array.Exists(extensions, ext => file.Name.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
+                if (Array.Exists(_extensions, ext => file.Name.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
                 {
                     if (file.Name == "character.ot")
                     {
@@ -43,7 +53,8 @@ public class Camera : IPatch
                     var record = file.Record;
                     var bytes = record.Read();
                     string data = System.Text.Encoding.Unicode.GetString(bytes.ToArray());
-                    if (!(data.Contains("CreateCameraZoomNode") || data.Contains("ClearCameraZoomNodes") || data.Contains("CreateCameraLookAtNode") || data.Contains("SetCustomCameraSpeed")))
+                    
+                    if (!_functions.Any(func => data.Contains(func)))
                     {
                         continue;
                     }
@@ -52,17 +63,18 @@ public class Camera : IPatch
 
                     for (int i = lines.Count - 1; i >= 0; i--)
                     {
-                        if (lines[i].Contains("CreateCameraZoomNode") || lines[i].Contains("ClearCameraZoomNodes") || lines[i].Contains("CreateCameraLookAtNode") || lines[i].Contains("SetCustomCameraSpeed"))
+                        string? foundFunction = _functions.FirstOrDefault(func => lines[i].Contains(func));
+                        
+                        while (foundFunction != null)
                         {
-                            int start = lines[i].IndexOf("CreateCameraZoomNode") >= 0 ? lines[i].IndexOf("CreateCameraZoomNode") :
-                                        lines[i].IndexOf("ClearCameraZoomNodes") >= 0 ? lines[i].IndexOf("ClearCameraZoomNodes") :
-                                        lines[i].IndexOf("CreateCameraLookAtNode") >= 0 ? lines[i].IndexOf("CreateCameraLookAtNode") :
-                                        lines[i].IndexOf("SetCustomCameraSpeed");
-
+                            int start = lines[i].IndexOf(foundFunction);
                             int end = lines[i].IndexOf(';', start);
-                            lines[i] = lines[i][..start] + lines[i][(end + 1)..];
+                            if (end >= 0)
+                            {
+                                lines[i] = lines[i][..start] + lines[i][(end + 1)..];
+                            }
+                            foundFunction = _functions.FirstOrDefault(func => lines[i].Contains(func));
                         }
-
                     }
                     string newData = string.Join("\r\n", lines);
                     var newBytes = System.Text.Encoding.Unicode.GetBytes(newData);
