@@ -56,19 +56,52 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
-                <!-- Select All / None -->
-                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
-                    <Button Content="Select All" 
-                            Click="SelectAllButton_Click" 
-                            MinWidth="80"
-                            FontSize="11"
-                            Style="{StaticResource SecondaryButton}"/>
-                    <Button Content="Select None" 
-                            Click="SelectNoneButton_Click" 
-                            MinWidth="80"
-                            FontSize="11"
-                            Style="{StaticResource SecondaryButton}"/>
-                </StackPanel>
+                <!-- Select All / None and Zoom Control -->
+                <Grid Grid.Row="0" Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                        <Button Content="Select All" 
+                                Click="SelectAllButton_Click" 
+                                MinWidth="80"
+                                FontSize="11"
+                                Style="{StaticResource SecondaryButton}"/>
+                        <Button Content="Select None" 
+                                Click="SelectNoneButton_Click" 
+                                MinWidth="80"
+                                FontSize="11"
+                                Style="{StaticResource SecondaryButton}"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <TextBlock Text="Camera Zoom:" 
+                                   VerticalAlignment="Center" 
+                                   Margin="0,0,8,0"
+                                   FontSize="11"
+                                   Foreground="#E0E0E0"/>
+                        <Slider x:Name="ZoomSlider"
+                                Width="120"
+                                Minimum="1.2"
+                                Maximum="2.4"
+                                Value="2.4"
+                                TickFrequency="0.2"
+                                IsSnapToTickEnabled="True"
+                Style="{StaticResource RoundGreySlider}"
+                                VerticalAlignment="Center"
+                                ValueChanged="ZoomSlider_ValueChanged"/>
+                        <TextBlock x:Name="ZoomValueText"
+                                   Text="2.4"
+                                   Width="30"
+                                   VerticalAlignment="Center"
+                                   Margin="8,0,0,0"
+                                   FontSize="11"
+                                   Foreground="#B0B0B0"/>
+                    </StackPanel>
+                </Grid>
 
                 <!-- Patches List -->
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Style="{StaticResource DarkScrollViewer}">

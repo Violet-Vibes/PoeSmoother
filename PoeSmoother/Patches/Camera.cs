@@ -11,6 +11,8 @@ public class Camera : IPatch
     public string Name => "Camera Patch";
     public object Description => "Allows adjusting the default camera zoom level.";
 
+    public double ZoomLevel { get; set; } = 2.4;
+
     private readonly string[] _directory = {
         "metadata",
     };
@@ -19,18 +21,6 @@ public class Camera : IPatch
         ".ot",
         ".otc",
     };
-
-    private double zoomLevel;
-
-    public Camera(double zoom = 2.4)
-    {
-        zoomLevel = zoom;
-    }
-
-    public void SetZoomLevel(double zoom)
-    {
-        zoomLevel = zoom;
-    }
 
     private void RecursivePatcher(DirectoryNode dir)
     {
@@ -45,7 +35,8 @@ public class Camera : IPatch
 
                 if (Array.Exists(extensions, ext => file.Name.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
                 {
-                    if (file.Name == "character.ot") {
+                    if (file.Name == "character.ot")
+                    {
                         continue;
                     }
 
@@ -101,17 +92,20 @@ public class Camera : IPatch
                                 var record = file.Record;
                                 var bytes = record.Read();
                                 string data = System.Text.Encoding.Unicode.GetString(bytes.ToArray());
+                                List<string> lines = data.Split("\r\n").ToList();
+                                string zoomLevelString = ZoomLevel.ToString().Replace(',', '.');
 
                                 if (data.Contains("CreateCameraZoomNode"))
                                 {
-                                    continue;
+                                    int x = lines.FindIndex(line => line.Contains("CreateCameraZoomNode"));
+                                    lines[x] = $"\ton_initial_position_set = \"CreateCameraZoomNode(5000.0, 5000.0, {zoomLevelString});\" ";
                                 }
-
-                                List<string> lines = data.Split("\r\n").ToList();
-                                int index = lines.FindIndex(x => x.Contains("team = 1"));
-                                if (index == -1) continue;
-                                string zoomLevelString = zoomLevel.ToString().Replace(',', '.');
-                                lines.Insert(index + 1, $"\ton_initial_position_set = \"CreateCameraZoomNode(5000.0, 5000.0, {zoomLevelString});\" ");
+                                else
+                                {
+                                    int index = lines.FindIndex(x => x.Contains("team = 1"));
+                                    if (index == -1) continue;
+                                    lines.Insert(index + 1, $"\ton_initial_position_set = \"CreateCameraZoomNode(5000.0, 5000.0, {zoomLevelString});\" ");
+                                }
                                 string newData = string.Join("\r\n", lines);
                                 var newBytes = System.Text.Encoding.Unicode.GetBytes(newData);
                                 record.Write(newBytes);

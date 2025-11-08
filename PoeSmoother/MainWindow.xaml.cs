@@ -19,12 +19,13 @@ public partial class MainWindow : Window
 
     public MainWindow()
     {
-        InitializeComponent();
+
         _patches = new ObservableCollection<PatchViewModel>();
+        InitializeComponent();
         InitializePatches();
         PatchesItemsControl.ItemsSource = _patches;
         UpdateStatus();
-        
+
         // Apply dark title bar
         Loaded += (s, e) => ApplyDarkTitleBar();
     }
@@ -34,7 +35,7 @@ public partial class MainWindow : Window
         if (PresentationSource.FromVisual(this) is HwndSource hwndSource)
         {
             IntPtr hwnd = hwndSource.Handle;
-            
+
             // Use DWMWA_USE_IMMERSIVE_DARK_MODE (20) for Windows 11 / Windows 10 build 19041+
             int attribute = 20;
             int useImmersiveDarkMode = 1;
@@ -99,13 +100,32 @@ public partial class MainWindow : Window
         }
     }
 
+    private void ZoomSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (ZoomValueText != null)
+        {
+            ZoomValueText.Text = e.NewValue.ToString("F1").Replace(',', '.');
+        }
+
+        if (_patches != null)
+        {
+            foreach (var patch in _patches)
+            {
+                if (patch.Patch is Camera cameraPatch)
+                {
+                    cameraPatch.ZoomLevel = e.NewValue;
+                }
+            }
+        }
+    }
+
     private async void ApplyButton_Click(object sender, RoutedEventArgs e)
     {
         var selectedPatches = _patches.Where(p => p.IsSelected).ToList();
-        
+
         if (selectedPatches.Count == 0)
         {
-            MessageBox.Show("Please select at least one patch to apply.", "No Patches Selected", 
+            MessageBox.Show("Please select at least one patch to apply.", "No Patches Selected",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
@@ -117,7 +137,7 @@ public partial class MainWindow : Window
     {
         if (string.IsNullOrEmpty(_ggpkPath) || !File.Exists(_ggpkPath))
         {
-            MessageBox.Show("Please select a valid GGPK file first.", "Invalid File", 
+            MessageBox.Show("Please select a valid GGPK file first.", "Invalid File",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
@@ -140,7 +160,7 @@ public partial class MainWindow : Window
                 for (int i = 0; i < patchesToApply.Count; i++)
                 {
                     var patch = patchesToApply[i];
-                    
+
                     Dispatcher.Invoke(() =>
                     {
                         StatusTextBlock.Text = $"Applying {patch.Name} ({i + 1}/{patchesToApply.Count})...";
@@ -149,7 +169,7 @@ public partial class MainWindow : Window
 
                     patch.Patch.Apply(fileTree);
                     index.Save();
-                    
+
                     Dispatcher.Invoke(() =>
                     {
                         ProgressBar.Value = i + 1;
@@ -158,13 +178,13 @@ public partial class MainWindow : Window
             });
 
             StatusTextBlock.Text = $"Successfully applied {patchesToApply.Count} patch(es)!";
-            MessageBox.Show($"Successfully applied {patchesToApply.Count} patch(es)!", "Success", 
+            MessageBox.Show($"Successfully applied {patchesToApply.Count} patch(es)!", "Success",
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex)
         {
             StatusTextBlock.Text = "Error occurred while applying patches.";
-            MessageBox.Show($"Error applying patches:\n\n{ex.Message}", "Error", 
+            MessageBox.Show($"Error applying patches:\n\n{ex.Message}", "Error",
                 MessageBoxButton.OK, MessageBoxImage.Error);
         }
         finally
