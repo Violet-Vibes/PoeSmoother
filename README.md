@@ -12,6 +12,9 @@
 - **Minimap Patch**
   - Reveals the entire minimap by default
 
+- **Color Mods Patch**
+  - Changes colors of mods in the game
+
 - **Fog Patch**
   - Disables the default fog effect in the game
 
