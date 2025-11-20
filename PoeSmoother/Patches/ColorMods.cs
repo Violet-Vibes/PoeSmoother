@@ -25,6 +25,8 @@ public class ColorMods : IPatch
         new ColorModsOption("map_additional_player_maximum_resistances_%", "red", true),
         new ColorModsOption("map_monsters_are_hexproof", "red", true),
         new ColorModsOption("map_player_cooldown_speed_+%_final", "red", true),
+        new ColorModsOption("map_item_drop_quantity_+%", "pink", true),
+        new ColorModsOption("map_item_drop_rarity_+%", "pink", true),
         new ColorModsOption("chance_%_to_drop_additional_divine_orb", "yellow", true),
         new ColorModsOption("map_boss_additional_divine_orb_to_drop", "yellow", true),
         new ColorModsOption("%_chance_to_duplicate_dropped_currency", "blue", true),
